@@ -1,0 +1,114 @@
+---
+CompileFlags:
+    Add:
+        [
+            "-std=gnu17",
+            "-fsanitize=address,undefined",
+            "-fno-omit-frame-pointer",
+            "-fno-common",
+            "-fmessage-length=0",
+            "-fdiagnostics-color=always",
+            "-Wwrite-strings",
+            "-Wunused-parameter",
+            "-Wunused",
+            "-Wunknown-warning-option",
+            "-Wundef",
+            "-Wtrampolines",
+            "-Wswitch-default",
+            "-Wstrict-prototypes",
+            "-Wstrict-overflow=5",
+            "-Wstrict-aliasing=2",
+            "-Wsign-compare",
+            "-Wshadow",
+            "-Wredundant-decls",
+            "-Wpointer-arith",
+            "-Wpedantic",
+            "-Wold-style-definition",
+            "-Wnull-dereference",
+            "-Wno-discarded-qualifiers",
+            "-Wno-aggregate-return",
+            "-Wnested-externs",
+            "-Wmissing-include-dirs",
+            "-Wuninitialized",
+            "-Wlogical-op",
+            "-Wjump-misses-init",
+            "-Winit-self",
+            "-Wincompatible-pointer-types",
+            "-Wformat=2",
+            "-Wfloat-equal",
+            "-Wextra",
+            "-Werror=implicit-function-declaration",
+            "-Werror",
+            "-Wduplicated-cond",
+            "-Wduplicated-branches",
+            "-Wdouble-promotion",
+            "-Wdiscarded-qualifiers",
+            "-Wconversion",
+            "-Wcast-align",
+            "-Wall",
+            "-Waggregate-return",
+            "-Wdangling-pointer=2",
+        ]
+    Remove: ["-mcpu=cortex-a72.cortex-a53"]
+
+Diagnostics:
+    UnusedIncludes: Strict
+    MissingIncludes: Strict
+    ClangTidy:
+        Add:
+            [
+                "readability-*",
+                "modernize-*",
+                "performance-*",
+                "bugprone-*",
+                "clang-analyzer-*",
+                "misc-*",
+                "portability-*",
+                "cppcoreguidelines-*",
+            ]
+        Remove:
+            [
+                "modernize-use-trailing-return-type",
+                "clang-analyzer-fuchsia.*",
+                "clang-analyzer-osx.*",
+                "clang-analyzer-webkit.*",
+                "readability-identifier-length.*",
+            ]
+        CheckOptions:
+            WarningsAsErrors: "clang-analyzer-*,misc-*,portability-*,bugprone-*"
+            readability-identifier-naming.IgnoreMainLikeFunctions: false
+            readability-identifier-naming.ClassCase: CamelCase
+            readability-identifier-naming.ClassMemberCase: lower_case
+            readability-identifier-naming.ConstexprVariableCase: lower_case
+            readability-identifier-naming.EnumCase: lower_case
+            readability-identifier-naming.EnumConstantCase: UPPER_CASE
+            readability-identifier-naming.EnumSuffix: "_e"
+            readability-identifier-naming.FunctionCase: lower_case
+            readability-identifier-naming.GlobalConstantCase: UPPER_CASE
+            readability-identifier-naming.MacroDefinitionCase: UPPER_CASE
+            readability-identifier-naming.MemberCase: lower_case
+            readability-identifier-naming.NamespaceCase: lower_case
+            readability-identifier-naming.ParameterCase: lower_case
+            readability-identifier-naming.StaticConstantCase: UPPER_CASE
+            readability-identifier-naming.StaticVariableCase: lower_case
+            readability-identifier-naming.StructCase: lower_case
+            readability-identifier-naming.StructSuffix: "_s"
+            readability-identifier-naming.TypeAliasCase: lower_case
+            readability-identifier-naming.TypedefCase: lower_case
+            readability-identifier-naming.TypedefSuffix: "_t"
+            readability-identifier-naming.VariableCase: lower_case
+        FastCheckFilter: Loose
+
+Index:
+    Background: Build
+
+InlayHints:
+    Enabled: true
+    ParameterNames: true
+    DeducedTypes: true
+
+Hover:
+    ShowAKA: true
+
+Completion:
+    AllScopes: true
