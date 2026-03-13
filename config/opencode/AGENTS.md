@@ -1,8 +1,7 @@
-# AGENTS.md
+# AGENTS.md — AI Agent Reference
 
-Purpose: Canonical code style guide for automated agents. Follow these rules by
-default. Prefer correctness, readability, simplicity, and maintainability over
-premature optimization.
+**Purpose:** Canonical code style guide for automated agents. Follow these rules
+by default.
 
 ## Core Principles
 
@@ -21,6 +20,8 @@ premature optimization.
     - **Interfaces over singletons**: Enable testing and flexibility
     - **Explicit over implicit**: Clear data flow and dependencies
     - **Test-driven when possible**: Never disable tests, fix them
+- Text output:
+    - Do **NOT** use emojis, restrict to markdown formatting.
 
 ## Development Process
 
@@ -79,6 +80,13 @@ premature optimization.
 - End documentation groups with `/** @} */` where appropriate
 - Maintain consistent indentation in documentation blocks
 - Use specific, descriptive language avoiding vague terms like "handles stuff"
+
+> [!NOTE] Do not use angle brackets
+>
+> Do **not** use angle brackets (`< >`) for placeholder values in documentation
+> or Doxygen-style docstrings. Angle brackets can be interpreted as HTML tags
+> and may break rendering in some documentation tools. Use backticks (`) instead
+> to mark placeholder variables.
 
 ### Documentation with Docstrings
 
@@ -178,6 +186,129 @@ const config_type_t * g_config_ptr[MAX_INSTANCES];
 *   @{
 */
 ```
+
+---
+
+## Additional documentation
+
+Additional documentation will follow doxygen markdown format.
+
+Rules for writing `.md` documentation files compatible with Doxygen.
+
+### Files
+
+- Use `.md` or `.markdown` extensions.
+- Start each file with a level-1 header — Doxygen uses it as the page title.
+- To make a file the main page, label it `{#mainpage}`:
+    ```
+    My Project {#mainpage}
+    ===========
+    ```
+
+### Headers
+
+- Use ATX style (`#`) preferred over setext (`===`/`---`).
+- Levels 1–6 supported; levels 1–4 can be labeled and cross-referenced.
+- Add `{#labelid}` to headers you need to link to:
+    ```
+    ## My Section {#my-section}
+    ```
+
+### Paragraphs
+
+- Separate paragraphs with a blank line.
+- Never put formatting across paragraph boundaries (`*`, `_`, `~~` are limited
+  to one paragraph).
+
+### Emphasis
+
+- `*italic*` or `_italic_`, `**bold**` or `__bold__`
+- `~~strikethrough~~`
+- **Do not** rely on underscores inside identifiers (`a_nice_identifier` renders
+  as-is in Doxygen — no emphasis).
+
+### Code
+
+- Inline: wrap in backticks `` `code` ``
+- Fenced blocks (preferred over 4-space indent):
+    ````
+    ```cpp
+    int main() {}
+    ```
+    ````
+    or with tildes:
+    ```
+    ~~~{.py}
+    pass
+    ~~~
+    ```
+- Specify language for syntax highlighting (`.cpp`, `.py`, `.c`, etc.).
+- Code content is never processed for Markdown or Doxygen commands.
+
+---
+
+### Lists
+
+- Bullets: `-`, `+`, or `*`
+- Numbered: use **strictly ascending** integers (`1.`, `2.`, `3.`) — Doxygen
+  does not auto-renumber.
+- Separate distinct lists with a blank line (Doxygen keeps them separate;
+  standard Markdown merges them).
+- Do not use `1. / 1. / 1.` — each duplicate number starts a new list in
+  Doxygen.
+
+### Tables
+
+- Require a header row, separator row, and at least one data row:
+    ```
+    | Header A | Header B |
+    | :------- | -------: |
+    | left     |    right |
+    ```
+- Use `:` in separator for alignment (`:-` left, `-:` right, `:-:` center).
+- Row span: use `^` in a cell to merge with the cell above.
+- Column span: use adjacent `||` to span columns.
+
+### Links
+
+- Inline: `[text](url)` or `[text](url "title")`
+- Reference: define `[name]: url "title"` separately, then use `[text][name]`
+- Doxygen entity: `[text](@ref ClassName)` or `[text](@ref labelid)`
+- Auto-links: `<https://example.com>` or `<user@example.com>`
+
+### Images
+
+- `![Caption](/path/to/img.jpg)`
+- With size attributes:
+  `![Caption](/path/to/img.jpg){html: width=50%, latex: width=5cm}`
+- Doxygen reference: `![Caption](@ref image.png)`
+
+### Block Quotes & Alerts
+
+- Block quote: `> text` (requires a space after `>`)
+- GitHub-style alerts map to Doxygen commands:
+
+    | Syntax           | Doxygen output |
+    | ---------------- | -------------- |
+    | `> [!note]`      | `\note`        |
+    | `> [!warning]`   | `\warning`     |
+    | `> [!tip]`       | `\remark`      |
+    | `> [!caution]`   | `\attention`   |
+    | `> [!important]` | `\important`   |
+
+### Table of Contents
+
+- Place `[TOC]` on its own line to insert an auto-generated TOC.
+- Requires `TOC_INCLUDE_HEADINGS > 0` in `Doxyfile`.
+
+### Do Not
+
+- Do not use `*` rulers inside `/** */` comment blocks — they are stripped.
+- Do not start a code block mid-paragraph; the preceding line must be blank.
+- Do not put newlines in link URLs; max one newline in link text or title.
+- Do not use `<pre>` for Markdown content — Doxygen passes it untouched.
+
+---
 
 ## C Code Style
 
@@ -333,6 +464,76 @@ Follow these C coding conventions consistently across the codebase.
 
 #### Error Handling and Resource Management
 
+**PRECEDENCE NOTE**: The following do-while(0) pattern and memory allocation
+rules take precedence over other error handling guidelines when applicable.
+
+- **Avoid Dynamic Memory Allocation**:
+    - Avoid heap allocation (malloc, calloc, realloc, free) unless absolutely
+      necessary
+    - Only use dynamic allocation when stack space is insufficient or exhausted
+    - Prefer static allocation, automatic storage, or stack-based buffers
+    - Document justification when heap allocation is required
+
+- **Prefer do-while(0) for Error Handling**:
+    - Use do-while(0) construction for functions with multiple error conditions
+    - Provides single exit point without goto labels
+    - Simplifies cleanup code and reduces error-prone multiple returns
+    - Pattern recommended over multiple returns or complex goto chains
+
+- **do-while(0) Error Handling Pattern**:
+
+    ```c
+    int process_data(data_t const * input, result_t * output)
+    {
+        int rc = E_OK;
+        resource_t temp_resource = {0};
+        bool resource_initialized = false;
+
+        do
+        {
+            if (NULL == input || NULL == output)
+            {
+                rc = E_INVALID_PARAM;
+                break;
+            }
+
+            rc = validate_input(input);
+            if (E_OK != rc)
+            {
+                break;
+            }
+
+            rc = initialize_resource(&temp_resource);
+            if (E_OK != rc)
+            {
+                break;
+            }
+            resource_initialized = true;
+
+            rc = perform_operation(&temp_resource, input, output);
+            if (E_OK != rc)
+            {
+                break;
+            }
+
+            rc = finalize_result(output);
+            if (E_OK != rc)
+            {
+                break;
+            }
+
+        } while (0);
+
+        // Cleanup section - always executed
+        if (resource_initialized)
+        {
+            cleanup_resource(&temp_resource);
+        }
+
+        return rc;
+    }
+    ```
+
 - Centralize cleanup with a single exit path to simplify error handling:
     - Multiple returns make it easy to miss frees. Use goto for cleanup patterns
       to ensure every resource is released exactly once.
@@ -395,6 +596,13 @@ Follow these C coding conventions consistently across the codebase.
 - For every used symbol, explicitly #include the defining header (do not rely on
   transitive includes).
 - All headers must have include guards.
+
+    ```c
+    // header.h
+    #pragma once
+    // Code placed here is included only once per translation unit
+    ```
+
 - Never rely on users to include headers required by your headers.
 
 #### Include File Order
@@ -611,6 +819,29 @@ static inline void reg_write_barrier(volatile uint32_t * reg, uint32_t value)
 #define ADC_MCR_ADCLKSE_WIDTH            (1UL)
 #define ADC_MCR_ADCLKSE(x)               (((uint32_t)(x) << ADC_MCR_ADCLKSE_SHIFT) & ADC_MCR_ADCLKSE_MASK)
 ```
+
+---
+
+## Shell Scripts
+
+**Shebang:**
+
+```bash
+#!/bin/sh
+```
+
+Use `/bin/sh` for portability (not `/bin/bash` unless bash-specific features
+required).
+
+**Style rules:**
+
+- Use 4-space indentation
+- Quote variables: `"${VARIABLE}"`
+- Check exit codes: `if [ $? != 0 ]; then`
+- Use `[ ]` for tests, not `[[ ]]` for POSIX compatibility
+- Add error handling and descriptive messages
+
+---
 
 ## Deviations
 

@@ -67,6 +67,18 @@ vim.keymap.set("n", "<leader>c0", "<Plug>(git-conflict-none)", { desc = "Git Con
 vim.keymap.set("n", "[x", "<Plug>(git-conflict-prev-conflict)", { desc = "Git Conflict Previous Conflict" })
 vim.keymap.set("n", "]x", "<Plug>(git-conflict-next-conflict)", { desc = "Git Conflict Next Conflict" })
 
+-- Diff keymaps (only active in diff mode)
+vim.keymap.set("n", "<leader>du", function()
+	if vim.o.diff then
+		vim.cmd("diffupdate")
+	end
+end, { desc = "Diff: [U]pdate (recompute diff)" })
+vim.keymap.set("n", "<leader>do", function()
+	if vim.o.diff then
+		vim.cmd("diffoff")
+	end
+end, { desc = "Diff: turn [O]ff diff mode" })
+
 -- Terminal mode escape
 vim.keymap.set("t", "<Esc><Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
 
@@ -195,6 +207,56 @@ require("lazy").setup({
 				{ "<leader>b", group = "Buffer" },
 				{ "<leader>g", group = "Git" },
 				{ "<leader>c", group = "Code Actions/Git Conflict" },
+				{
+					"<leader>d",
+					group = "Diff",
+					cond = function()
+						return vim.o.diff
+					end,
+				},
+				-- Diff mode hints (shown only when in diff mode)
+				{
+					"]c",
+					desc = "Diff: jump to next change",
+					cond = function()
+						return vim.o.diff
+					end,
+				},
+				{
+					"[c",
+					desc = "Diff: jump to previous change",
+					cond = function()
+						return vim.o.diff
+					end,
+				},
+				{
+					"do",
+					desc = "Diff: obtain change from other file",
+					cond = function()
+						return vim.o.diff
+					end,
+				},
+				{
+					"dp",
+					desc = "Diff: put change to other file",
+					cond = function()
+						return vim.o.diff
+					end,
+				},
+				{
+					"<leader>du",
+					desc = "Diff: [U]pdate (recompute diff)",
+					cond = function()
+						return vim.o.diff
+					end,
+				},
+				{
+					"<leader>do",
+					desc = "Diff: turn [O]ff diff mode",
+					cond = function()
+						return vim.o.diff
+					end,
+				},
 			},
 		},
 	},
@@ -448,6 +510,7 @@ require("lazy").setup({
 				"shellcheck",
 				"oelint-adv",
 				"cmakelint",
+				"marksman",
 			})
 
 			-- Setup all LSP servers using vim.lsp.config
@@ -807,7 +870,82 @@ require("lazy").setup({
 		"folke/todo-comments.nvim",
 		event = "VimEnter",
 		dependencies = { "nvim-lua/plenary.nvim" },
-		opts = { signs = false },
+		opts = {
+			signs = false,
+			keywords = {
+				FIX = {
+					icon = " ",
+					color = "error",
+					alt = {
+						"FIXME",
+						"BUG",
+						"FIXIT",
+						"ISSUE",
+						"Fix",
+						"fix",
+						"Fixme",
+						"fixme",
+						"Bug",
+						"bug",
+						"Issue",
+						"issue",
+					},
+
+					-- signs = false, -- configure signs for some keywords individually
+				},
+				TODO = { icon = " ", color = "info", alt = { "Todo", "todo" } },
+				HACK = { icon = " ", color = "warning", alt = { "Hack", "hack" } },
+				WARN = {
+					icon = " ",
+					color = "warning",
+					alt = {
+						"WARNING",
+						"XXX",
+						"Warn",
+						"warn",
+						"Warning",
+						"warning",
+						"Deprecated",
+						"deprecated",
+						"DEPRECATED",
+					},
+				},
+				PERF = {
+					icon = " ",
+					alt = {
+						"OPTIM",
+						"PERFORMANCE",
+						"OPTIMIZE",
+						"Perf",
+						"perf",
+						"Optim",
+						"optim",
+						"Performance",
+						"performance",
+						"Optimize",
+						"optimize",
+					},
+				},
+				NOTE = { icon = " ", color = "hint", alt = { "INFO", "Note", "note", "Info", "info" } },
+				TEST = {
+					icon = "⏲ ",
+					color = "test",
+					alt = {
+						"TESTING",
+						"PASSED",
+						"FAILED",
+						"Test",
+						"test",
+						"Testing",
+						"testing",
+						"Passed",
+						"passed",
+						"Failed",
+						"failed",
+					},
+				},
+			},
+		},
 	},
 	{
 		"johmsalas/text-case.nvim",

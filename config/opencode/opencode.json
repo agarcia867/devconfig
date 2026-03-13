@@ -1,0 +1,12 @@
+{
+    "$schema": "https://opencode.ai/config.json",
+    "autoupdate": true,
+    "formatter": false,
+    "instructions": [
+        "/home/dev/agents/guidelines/cmake-code-style-guide.md",
+        "/home/dev/agents/guidelines/uml-diagrams.md",
+        "/home/dev/agents/guidelines/architecture-documentation-generation.md",
+        "/home/dev/agents/guidelines/bitbake-recipe-style-guide.md"
+    ],
+    "agent": {}
+}
